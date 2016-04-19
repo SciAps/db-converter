@@ -1,0 +1,61 @@
+def sciaps_utils = project(':libraries:sciapscore:utils')
+
+project.ext.set("sciaps_utils", sciaps_utils)
+
+def sciaps_Common = project(':libraries:common')
+
+project.ext.set("sciaps_Common", sciaps_Common)
+
+def sciaps_dataStorage = project(':libraries:sciapscore:data-storage')
+
+project.ext.set("sciaps_dataStorage", sciaps_dataStorage)
+
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'net.ltgt.gradle:gradle-apt-plugin:0.5'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
+
+allprojects {
+    group = 'com.sciaps'
+    version = '0.1.0-SNAPSHOT'
+    description = 'Core libraries for Sciaps'
+
+    repositories {
+        jcenter()
+        mavenLocal()
+        maven {
+            url "http://maven.sciaps.local"
+        }
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/staging/'
+        }
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+
+    configurations.all {
+        // check for updates every build
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.7'
+}
+
+
+dependencies {
+    compile project.sciaps_Common
+}
+

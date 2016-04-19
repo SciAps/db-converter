@@ -1,0 +1,5 @@
+include ':libraries:sciapscore:utils'
+include ':libraries:sciapscore:data-storage'
+include ':libraries:common'
+include ':app'
+

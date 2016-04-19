@@ -1,0 +1,6 @@
+[submodule "libraries/common"]
+	path = libraries/common
+	url = git@github.com:SciAps/Common.git
+[submodule "libraries/sciapscore"]
+	path = libraries/sciapscore
+	url = git@github.com:SciAps/SciapsCore.git

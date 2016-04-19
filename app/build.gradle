@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'net.ltgt.gradle:gradle-apt-plugin:0.5'
+    }
+}
+
+apply plugin: 'application'
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
+apply plugin: 'net.ltgt.apt'
+
+
+compileJava {
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+
+}
+
+mainClassName = 'com.sciaps.Main'
+version = '1.0'
+
+
+//create a single Jar with all dependencies
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'SciAps DB Converter',
+                'Implementation-Version': version,
+                'Main-Class': 'com.sciaps.Main'
+    }
+    baseName = "SciApsDBConverter"
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+
+dependencies {
+    compile project.sciaps_Common
+    compile project.sciaps_dataStorage
+    compile 'com.miglayout:miglayout-swing:5.0'
+    compile 'org.slf4j:slf4j-api:1.7.7'
+    compile 'com.github.insubstantial:substance:7.3'
+    compile 'ch.qos.logback:logback-classic:1.1.2'
+    compile 'com.dev-smart:devsmart-swing:0.1.5'
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.slf4j:slf4j-simple:1.7.12'
+}
+
