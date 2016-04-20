@@ -49,8 +49,9 @@ public final class MainFrame extends javax.swing.JFrame implements DBConverter.D
 
         this.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent e) {
-                super.windowClosing(e);
+            public void windowClosed(WindowEvent e) {
+                super.windowClosed(e);
+                System.exit(0);
             }
         });
 
