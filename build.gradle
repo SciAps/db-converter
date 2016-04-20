@@ -21,7 +21,6 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'maven'
 
@@ -52,10 +51,5 @@ allprojects {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.7'
-}
-
-
-dependencies {
-    compile project.sciaps_Common
 }
 

@@ -23,6 +23,19 @@ public class DBObjectConverter {
     public int testCnt = 0;
     public int testFailed = 0;
 
+    public static void convertSpectrumToSpectraData(LIBZPixelSpectrum spectrum, SpectraData spectraData) {
+        DataHelper.LIBZSpectraDataBuilder builder = DataHelper.LIBZSpectraDataBuilder.builder();
+        builder.knots(spectrum.knots, 0, spectrum.knots.length);
+
+        for (int i = 0; i < 4; i++) {
+            double[] coeff = spectrum.wlCalibrations[i].pixToNm.getCoefficients();
+            builder.setPixToNmCoeff(i, coeff, 0, coeff.length);
+            builder.setRawPixels(i, spectrum.pixels[i], 0, spectrum.pixels[i].length);
+        }
+
+        builder.build(spectraData);
+    }
+
     public boolean convertLIBZTestToAcquisition(OrgLIBZTest test, Acquisition acquisition, LIBZDB libzdb) {
         boolean status = true;
         testCnt++;
@@ -60,7 +73,7 @@ public class DBObjectConverter {
             //Avg
             LIBZPixelSpectrum avgSpectrum = (LIBZPixelSpectrum) libzdb.getAvgSpectrum(test);
             SpectraData avgSpectraData = acquisition.getDB().insert(SpectraData.class);
-            DataHelper.convertSpectrumToSpectraData(avgSpectrum, avgSpectraData);
+            convertSpectrumToSpectraData(avgSpectrum, avgSpectraData);
             spectraDatas[0] = avgSpectraData;
             avgSpectrum.release();
 
@@ -69,7 +82,7 @@ public class DBObjectConverter {
             ArrayList<LIBZPixelSpectrum> spectra = libzdb.getSpectra(test);
             for (LIBZPixelSpectrum spectrum : spectra) {
                 SpectraData spectraData = acquisition.getDB().insert(SpectraData.class);
-                DataHelper.convertSpectrumToSpectraData(spectrum, spectraData);
+                convertSpectrumToSpectraData(spectrum, spectraData);
                 spectraDatas[i] = spectraData;
                 spectrum.release();
                 i++;
