@@ -89,7 +89,7 @@ public final class OrgLIBZTest extends DBObj {
     public Config config = new Config();
 
     @IdReference
-    public OrgStandard orgStandard;
+    public OrgStandard standard;
 
     public String displayName = "";
     public TreeMap<String, String> metadata = new TreeMap<String, String>();
@@ -144,7 +144,7 @@ public final class OrgLIBZTest extends DBObj {
             return false;
         }
 
-        if (orgStandard != null ? !orgStandard.equals(orgLibzTest.orgStandard) : orgLibzTest.orgStandard != null) {
+        if (standard != null ? !standard.equals(orgLibzTest.standard) : orgLibzTest.standard != null) {
             return false;
         }
 
@@ -159,7 +159,7 @@ public final class OrgLIBZTest extends DBObj {
     public int hashCode() {
         int result = (int) (unixTime ^ (unixTime >>> 32));
         result = 31 * result + config.hashCode();
-        result = 31 * result + (orgStandard != null ? orgStandard.hashCode() : 0);
+        result = 31 * result + (standard != null ? standard.hashCode() : 0);
         result = 31 * result + displayName.hashCode();
         result = 31 * result + metadata.hashCode();
         result = 31 * result + (onlyAvgSaved ? 1 : 0);

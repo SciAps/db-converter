@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipInputStream;
 
@@ -165,6 +166,10 @@ public class DBConverter {
         }
 
         db.flush();
+
+        doTestModel(db);
+        //doTestAcquisition(db);
+
         db.close();
         db.shutdown();
 
@@ -181,6 +186,31 @@ public class DBConverter {
 
         System.out.println("TestCnt: " + dbObjectConverter.testCnt);
         System.out.println("Test Failed: " + dbObjectConverter.testFailed);
-        System.out.println("----done");
+    }
+
+    private void doTestModel(MicroDB db) {
+        try {
+            System.out.println("Retrieving Model");
+            Iterable<EmpiricalModel> models = db.getAllOfType(EmpiricalModel.class);
+            for (EmpiricalModel model : models) {
+
+                System.out.println("************" + model.getName() + "\t Standard: " + model.getStandards().length + "\t curves: " + model.getIrCurves().length);
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void doTestAcquisition(MicroDB db) {
+        try {
+            System.out.println("Retrieving test");
+            Iterable<Acquisition> tests = db.getAllOfType(Acquisition.class);
+            for (Acquisition test : tests) {
+
+                System.out.println("************" + test.getTime());
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.sciaps.Utils;
 
+import com.devsmart.StringUtils;
 import com.devsmart.ubjson.UBObject;
 import com.devsmart.ubjson.UBValue;
 import com.devsmart.ubjson.UBValueFactory;
@@ -40,15 +41,21 @@ public class DBObjectConverter {
     public boolean convertLIBZTestToAcquisition(OrgLIBZTest test, Acquisition acquisition, LIBZDB libzdb) {
         boolean status = true;
         testCnt++;
+
+        //Time
+        acquisition.setTime(test.unixTime);
+
         //standard
-        if (test.orgStandard != null) {
-            Standard dbStandard = mDBObjectInventory.getDBStandardByStandard(test.orgStandard);
+        if (test.standard != null) {
+            Standard dbStandard = mDBObjectInventory.getDBStandardByStandard(test.standard);
             if (dbStandard == null) {
                 dbStandard = acquisition.getDB().insert(Standard.class);
-                convertStandardToDBStandard(test.orgStandard, dbStandard);
-                mDBObjectInventory.addStandardToDBStandardingMapping(test.orgStandard, dbStandard);
+                convertStandardToDBStandard(test.standard, dbStandard);
+                mDBObjectInventory.addStandardToDBStandardingMapping(test.standard, dbStandard);
             }
             acquisition.setStandard(dbStandard);
+        } else {
+            acquisition.setStandard(null);
         }
 
         //Acquisition params
@@ -61,6 +68,9 @@ public class DBObjectConverter {
         acquisition.setMetadata(metadata);
 
         // display name
+        if (!StringUtils.isEmptyString(test.displayName)) {
+            metadata.put("displayName", UBValueFactory.createValue(test.displayName));
+        }
         //acquisition.setDisplayName(test.displayName);
 
         // Only Avg Save flag
@@ -139,7 +149,7 @@ public class DBObjectConverter {
         int index = 0;
         for (Map.Entry<AtomicElement, OrgIRCurve> irCurve : orgModel.irs.entrySet()) {
 
-            IRCurve dbirCurve = empiricalModel.getDB().create(IRCurve.class);
+            IRCurve dbirCurve = empiricalModel.getDB().insert(IRCurve.class);
             dbirCurve.setPriority(0); // not multiple curves, not need to set priority
             convertIRCurveToDBIRCurve(irCurve.getValue(), dbirCurve);
 
@@ -205,7 +215,7 @@ public class DBObjectConverter {
             for (OrgIRCurve orgIRCurve : orgIRCurves) {
                 priority = 0; // reset the curve priority within each element
 
-                IRCurve dbirCurve = empiricalModel.getDB().create(IRCurve.class);
+                IRCurve dbirCurve = empiricalModel.getDB().insert(IRCurve.class);
                 dbirCurve.setPriority(priority);
                 convertIRCurveToDBIRCurve(orgIRCurve, dbirCurve);
 
