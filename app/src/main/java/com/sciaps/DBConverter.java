@@ -96,6 +96,7 @@ public class DBConverter {
         // 2. Tests
         // 3. Models
         // 4. Fingerprints
+        // 5. Grade Library
 
         notifyCallback("Reading Standards...");
         logger.info("Reading Standards");
@@ -180,5 +181,6 @@ public class DBConverter {
 
         System.out.println("TestCnt: " + dbObjectConverter.testCnt);
         System.out.println("Test Failed: " + dbObjectConverter.testFailed);
+        System.out.println("----done");
     }
 }

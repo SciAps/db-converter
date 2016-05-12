@@ -72,6 +72,7 @@ public class LIBZAcquisitionParams {
         values.put(START_LOCATIONS, UBValueFactory.createArray(rasterParams.startLocation));
         values.put(END_LOCATIONS, UBValueFactory.createArray(rasterParams.endLocation));
         values.put(NUM_LOCATIONS, UBValueFactory.createValue(rasterParams.numlocations));
+        values.put(NUM_SHOTS_PER_LOC, UBValueFactory.createValue(rasterParams.numShotsPerLocation));
         values.put(NUM_CLEANING_SHOTS_PER_LOC, UBValueFactory.createValue(rasterParams.numCleaningShotsPerLocation));
         values.put(ARGON_PRE_FLUSH, UBValueFactory.createValue(rasterParams.argonpreflush));
         values.put(RESET_STAGE, UBValueFactory.createBool(rasterParams.resetStage));
@@ -96,7 +97,7 @@ public class LIBZAcquisitionParams {
         rasterParams.endLocation = config.get(END_LOCATIONS).asInt32Array();
         rasterParams.numlocations = config.get(NUM_LOCATIONS).asInt();
         rasterParams.numCleaningShotsPerLocation = config.get(NUM_CLEANING_SHOTS_PER_LOC).asInt();
-        rasterParams.numShotsPerLocation = config.get(NUM_CLEANING_SHOTS_PER_LOC).asInt();
+        rasterParams.numShotsPerLocation = config.get(NUM_SHOTS_PER_LOC).asInt();
         rasterParams.argonpreflush = config.get(ARGON_PRE_FLUSH).asInt();
         rasterParams.resetStage = config.get(RESET_STAGE).asBool();
         rasterParams.useGating = config.get(USE_GATING).asBool();

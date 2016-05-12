@@ -7,6 +7,7 @@ import com.sciaps.common.AtomicElement;
 import com.sciaps.common.data.ChemValue;
 import com.sciaps.common.spectrum.LIBZPixelSpectrum;
 import com.sciaps.data.*;
+import com.sciaps.datastructures.ArrayTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -230,18 +231,12 @@ public class DBObjectConverter {
         // String name
         dbStandard.setName(orgStandard.name);
 
-        // Element assay
-        int[] atomicNum = new int[orgStandard.spec.size()];
-        double[] assayPercent = new double[orgStandard.spec.size()];
+        ArrayTable table = ArrayTable.createWithColumnTypes(int.class, double.class);
 
-        int i = 0;
         for (ChemValue chemValue : orgStandard.spec) {
-            atomicNum[i] = chemValue.element.atomicNumber;
-            assayPercent[i] = chemValue.percent;
-            i++;
+            table.addRow(chemValue.element.atomicNumber, chemValue.percent);
         }
-        dbStandard.setAtomicNum(atomicNum);
-        dbStandard.setAssayPercent(assayPercent);
+        dbStandard.setAssayTable(table);
 
         // int standardType
         dbStandard.setModeType(orgStandard.standardType);
