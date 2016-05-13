@@ -79,17 +79,17 @@ public class DBObjectConverter {
         // get spectra data
         try {
             // Avg and each shot
-            SpectraData[] spectraDatas = new SpectraData[libzdb.getSpectra(test).size() + 1];
+            SpectraData[] spectraDatas = new SpectraData[libzdb.getSpectra(test).size()];
 
             //Avg
-            LIBZPixelSpectrum avgSpectrum = (LIBZPixelSpectrum) libzdb.getAvgSpectrum(test);
-            SpectraData avgSpectraData = acquisition.getDB().insert(SpectraData.class);
-            convertSpectrumToSpectraData(avgSpectrum, avgSpectraData);
-            spectraDatas[0] = avgSpectraData;
-            avgSpectrum.release();
+            //LIBZPixelSpectrum avgSpectrum = (LIBZPixelSpectrum) libzdb.getAvgSpectrum(test);
+            //SpectraData avgSpectraData = acquisition.getDB().insert(SpectraData.class);
+            //convertSpectrumToSpectraData(avgSpectrum, avgSpectraData);
+            //spectraDatas[0] = avgSpectraData;
+            //avgSpectrum.release();
 
             //Shot data
-            int i = 1; // starts index at 1 because 0 is used for avg
+            int i = 0;
             ArrayList<LIBZPixelSpectrum> spectra = libzdb.getSpectra(test);
             for (LIBZPixelSpectrum spectrum : spectra) {
                 SpectraData spectraData = acquisition.getDB().insert(SpectraData.class);
