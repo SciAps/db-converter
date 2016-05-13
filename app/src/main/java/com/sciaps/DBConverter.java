@@ -207,7 +207,9 @@ public class DBConverter {
             Iterable<Acquisition> tests = db.getAllOfType(Acquisition.class);
             for (Acquisition test : tests) {
 
-                System.out.println("************" + test.getTime());
+                if (test.getSpectraData() != null) {
+                    System.out.println("************" + test.getSpectraData().length);
+                }
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());

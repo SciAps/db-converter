@@ -128,9 +128,9 @@ public class DBObjectConverter {
         empiricalModel.setAcquisitionParams(libzAcquisitionParams);
 
         //Standard[]
-        Standard[] standards = new Standard[orgModel.orgStandardList.size()];
+        Standard[] standards = new Standard[orgModel.standardList.size()];
         int i = 0;
-        for (OrgStandard orgStandard : orgModel.orgStandardList) {
+        for (OrgStandard orgStandard : orgModel.standardList) {
             Standard dbStandard = mDBObjectInventory.getDBStandardByStandard(orgStandard);
             if (dbStandard == null) {
                 dbStandard = empiricalModel.getDB().insert(Standard.class);
@@ -187,9 +187,9 @@ public class DBObjectConverter {
         empiricalModel.setModeType(orgModel.modelType);
 
         //LinkList<standard>
-        Standard[] standards = new Standard[orgModel.orgStandardList.size()];
+        Standard[] standards = new Standard[orgModel.standardList.size()];
         int i = 0;
-        for (OrgStandard orgStandard : orgModel.orgStandardList) {
+        for (OrgStandard orgStandard : orgModel.standardList) {
             Standard dbStandard = mDBObjectInventory.getDBStandardByStandard(orgStandard);
             if (dbStandard == null) {
                 dbStandard = empiricalModel.getDB().insert(Standard.class);

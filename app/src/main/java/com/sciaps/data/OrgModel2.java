@@ -21,7 +21,7 @@ public class OrgModel2 extends DBObj {
     public ILaserController.RasterParams rasterParams;
 
     @IdReference(type = OrgStandard.class)
-    public List<OrgStandard> orgStandardList = new LinkedList<OrgStandard>();
+    public List<OrgStandard> standardList = new LinkedList<OrgStandard>();
 
     public Map<AtomicElement, List<OrgIRCurve>> irs = new HashMap<AtomicElement, List<OrgIRCurve>>();
 

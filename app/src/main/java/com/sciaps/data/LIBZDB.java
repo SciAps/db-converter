@@ -123,7 +123,7 @@ public class LIBZDB {
         ByteArrayInputStream bin = new ByteArrayInputStream(mSpectrumTable.get(allId));
         MultiShotSpectrumFileInputStream multiShotIn = new MultiShotSpectrumFileInputStream(bin);
 
-        multiShotIn.seekTo(-1);
+        multiShotIn.seekTo(0);
         LIBZPixelSpectrum spectrum = multiShotIn.getNextShot();
         while (spectrum != null) {
             retval.add(spectrum);

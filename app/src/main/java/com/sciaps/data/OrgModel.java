@@ -19,7 +19,7 @@ public class OrgModel extends DBObj {
     public int modelType = ModelType.MODEL_TYPE_ALLOY | ModelType.MODEL_TYPE_SCIAPS;
 
     @IdReference(type = OrgStandard.class)
-    public List<OrgStandard> orgStandardList = new LinkedList<OrgStandard>();
+    public List<OrgStandard> standardList = new LinkedList<OrgStandard>();
 
     public Map<AtomicElement, OrgIRCurve> irs = new HashMap<AtomicElement, OrgIRCurve>();
 
