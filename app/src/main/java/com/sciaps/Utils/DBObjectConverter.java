@@ -212,12 +212,12 @@ public class DBObjectConverter {
         int index = 0;
         for (List<OrgIRCurve> orgIRCurves : orgModel.irs.values()) {
 
+            priority = 0; // reset the curve priority within each element
             for (OrgIRCurve orgIRCurve : orgIRCurves) {
-                priority = 0; // reset the curve priority within each element
 
                 IRCurve dbirCurve = empiricalModel.getDB().insert(IRCurve.class);
-                dbirCurve.setPriority(priority);
                 convertIRCurveToDBIRCurve(orgIRCurve, dbirCurve);
+                dbirCurve.setPriority(priority);
 
                 irCurves[index] = dbirCurve;
                 index++;
@@ -314,6 +314,8 @@ public class DBObjectConverter {
 
         // String name;
         dbRegion.setName(orgRegion.name);
+
+        dbRegion.setEnabled(true);
 
         // WaveLengthRange wavelengthRange;
         dbRegion.setWlMin(orgRegion.wavelengthRange.getMinimumDouble());
