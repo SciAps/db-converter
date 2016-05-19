@@ -315,7 +315,7 @@ public class DBObjectConverter {
         // String name;
         dbRegion.setName(orgRegion.name);
 
-        dbRegion.setEnabled(true);
+        dbRegion.setDisabled(false);
 
         // WaveLengthRange wavelengthRange;
         dbRegion.setWlMin(orgRegion.wavelengthRange.getMinimumDouble());
