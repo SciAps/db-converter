@@ -377,7 +377,7 @@ public class DBObjectConverter {
         // double calRangeFactor
         dbirCurve.setCalRangeFactor(irCurve.calRangeFactor);
 
-        IRRatio irRatio = new IRRatio();
+        IRRatio irRatio = dbirCurve.getDB().insert(IRRatio.class);
 
         dbirCurve.setIrRatio(irRatio);
 
