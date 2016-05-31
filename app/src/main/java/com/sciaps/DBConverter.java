@@ -2,6 +2,7 @@ package com.sciaps;
 
 import com.devsmart.microdb.DBBuilder;
 import com.devsmart.microdb.MicroDB;
+import com.google.common.collect.Iterables;
 import com.sciaps.Utils.DBObjectConverter;
 import com.sciaps.data.*;
 import org.slf4j.Logger;
@@ -127,11 +128,13 @@ public class DBConverter {
 
 
         // dbVersion == -1 is older DB(no multicurves)
+        int totalModels = 0;
         if (dbVersion < 0) {
             notifyCallback("Reading Models...");
             logger.info("Reading Models");
             Iterable<OrgModel> models = libzdb.getAllModels();
 
+            totalModels = Iterables.size(models);
             notifyCallback("Processing Models...");
             logger.info("Processing Models");
             for (OrgModel orgModel : models) {
@@ -144,6 +147,7 @@ public class DBConverter {
             logger.info("Reading Models");
             Iterable<OrgModel2> models2 = libzdb.getAllModels2();
 
+            totalModels = Iterables.size(models2);
             notifyCallback("Processing Models...");
             logger.info("Processing Models");
             for (OrgModel2 orgModel2 : models2) {
@@ -167,8 +171,9 @@ public class DBConverter {
 
         db.flush();
 
-        doTestModel(db);
+        //doTestModel(db);
         //doTestAcquisition(db);
+        //doStandardTest(db);
 
         db.close();
         db.shutdown();
@@ -186,6 +191,11 @@ public class DBConverter {
 
         System.out.println("TestCnt: " + dbObjectConverter.testCnt);
         System.out.println("Test Failed: " + dbObjectConverter.testFailed);
+
+        System.out.println("Total Model:     " + totalModels);
+        System.out.println("Total Standards: " + Iterables.size(standards));
+        System.out.println("Total Tests:     " + Iterables.size(tests));
+
     }
 
     private void doTestModel(MicroDB db) {
@@ -211,6 +221,17 @@ public class DBConverter {
                     System.out.println("************" + test.getSpectraData().length);
                 }
             }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void doStandardTest(MicroDB db) {
+        try {
+            System.out.println("Retrieving test");
+            Iterable<Standard> standards = db.getAllOfType(Standard.class);
+
+            System.out.println("# Standards = " + Iterables.size(standards));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

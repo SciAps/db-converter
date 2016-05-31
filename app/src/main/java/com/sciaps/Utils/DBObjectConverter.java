@@ -51,7 +51,6 @@ public class DBObjectConverter {
             if (dbStandard == null) {
                 dbStandard = acquisition.getDB().insert(Standard.class);
                 convertStandardToDBStandard(test.standard, dbStandard);
-                mDBObjectInventory.addStandardToDBStandardingMapping(test.standard, dbStandard);
             }
             acquisition.setStandard(dbStandard);
         } else {
@@ -135,7 +134,6 @@ public class DBObjectConverter {
             if (dbStandard == null) {
                 dbStandard = empiricalModel.getDB().insert(Standard.class);
                 convertStandardToDBStandard(orgStandard, dbStandard);
-                mDBObjectInventory.addStandardToDBStandardingMapping(orgStandard, dbStandard);
             }
 
             standards[i] = dbStandard;
@@ -194,7 +192,6 @@ public class DBObjectConverter {
             if (dbStandard == null) {
                 dbStandard = empiricalModel.getDB().insert(Standard.class);
                 convertStandardToDBStandard(orgStandard, dbStandard);
-                mDBObjectInventory.addStandardToDBStandardingMapping(orgStandard, dbStandard);
             }
 
             standards[i] = dbStandard;
@@ -250,6 +247,8 @@ public class DBObjectConverter {
 
         // int standardType
         dbStandard.setModeType(orgStandard.standardType);
+
+        mDBObjectInventory.addStandardToDBStandardingMapping(orgStandard, dbStandard);
 
         return status;
     }
@@ -345,8 +344,7 @@ public class DBObjectConverter {
             Standard dbStandard = mDBObjectInventory.getDBStandardByStandard(orgStandard);
             if (dbStandard == null) {
                 dbStandard = dbirCurve.getDB().insert(Standard.class);
-
-                mDBObjectInventory.addStandardToDBStandardingMapping(orgStandard, dbStandard);
+                convertStandardToDBStandard(orgStandard, dbStandard);
             }
 
             excludedStandards[index] = dbStandard;
@@ -441,7 +439,6 @@ public class DBObjectConverter {
             if (dbStandard == null) {
                 dbStandard = dbFingerprintLibTemplate.getDB().insert(Standard.class);
                 convertStandardToDBStandard(orgStandard, dbStandard);
-                mDBObjectInventory.addStandardToDBStandardingMapping(orgStandard, dbStandard);
             }
 
             standards[index] = dbStandard;
