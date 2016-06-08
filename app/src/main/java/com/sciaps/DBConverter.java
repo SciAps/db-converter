@@ -157,17 +157,21 @@ public class DBConverter {
             }
         }
 
-        notifyCallback("Reading Fingerprints...");
-        logger.info("Reading Fingerprints");
-        Iterable<OrgFingerprintLibraryTemplate> fingerprints = libzdb.getAllFingerprints();
-
-        notifyCallback("Processing Fingerprints...");
-        logger.info("Processing Fingerprints");
-        for (OrgFingerprintLibraryTemplate orgFingerprintLibraryTemplate : fingerprints) {
-            logger.info("    FP: " + orgFingerprintLibraryTemplate.name);
-            FingerprintLibTemplate dbFingerprintLibTemplate = db.insert(FingerprintLibTemplate.class);
-            dbObjectConverter.convertFingerprintToDBFingerprint(orgFingerprintLibraryTemplate, dbFingerprintLibTemplate);
-        }
+        // Because Template has a dependency on the type of Analyzer it is created from. It is not a good idea
+        // to convert them, to prevent the template is used in a wrong type of analyzer
+        //
+        //
+        //notifyCallback("Reading Fingerprints...");
+        //logger.info("Reading Fingerprints");
+        //Iterable<OrgFingerprintLibraryTemplate> fingerprints = libzdb.getAllFingerprints();
+        //
+        //notifyCallback("Processing Fingerprints...");
+        //logger.info("Processing Fingerprints");
+        //for (OrgFingerprintLibraryTemplate orgFingerprintLibraryTemplate : fingerprints) {
+        //   logger.info("    FP: " + orgFingerprintLibraryTemplate.name);
+        //    FingerprintLibTemplate dbFingerprintLibTemplate = db.insert(FingerprintLibTemplate.class);
+        //    dbObjectConverter.convertFingerprintToDBFingerprint(orgFingerprintLibraryTemplate, dbFingerprintLibTemplate);
+        //}
 
         db.flush();
 
