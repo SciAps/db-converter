@@ -5,6 +5,7 @@ import com.devsmart.ubjson.UBObject;
 import com.devsmart.ubjson.UBValue;
 import com.devsmart.ubjson.UBValueFactory;
 import com.sciaps.common.AtomicElement;
+import com.sciaps.common.algorithms.SGolayIntensity;
 import com.sciaps.common.data.ChemValue;
 import com.sciaps.common.spectrum.LIBZPixelSpectrum;
 import com.sciaps.data.*;
@@ -321,8 +322,26 @@ public class DBObjectConverter {
         dbRegion.setWlMax(orgRegion.wavelengthRange.getMaximumDouble());
 
         // Params
+        boolean needSetToDefault = false;
+        String algorithmName = "";
+        String valueStr = "";
+
+        try {
+            algorithmName = orgRegion.params.get("name");
+            valueStr = orgRegion.params.get("sgolay_easy");
+        } catch (Exception e) {
+            needSetToDefault = true;
+        }
+
+        if (needSetToDefault) {
+            algorithmName = "com.sciaps.common.algorithms.SimpleIntensityValue";
+            valueStr = "[3, 2, 0]";
+        }
+
         UBObject params = UBValueFactory.createObject(orgRegion.params);
         dbRegion.setParams(params);
+        params.put("name", UBValueFactory.createValue(algorithmName));
+        params.put(SGolayIntensity.KEY_SGOLAYEASY, UBValueFactory.createValue(valueStr));
 
         // int mode type;
         dbRegion.setModeType(orgRegion.regionType);
