@@ -322,26 +322,19 @@ public class DBObjectConverter {
         dbRegion.setWlMax(orgRegion.wavelengthRange.getMaximumDouble());
 
         // Params
-        boolean needSetToDefault = false;
-        String algorithmName = "";
-        String valueStr = "";
+        String algorithmName = orgRegion.params.get("name");
+        String valueStr = orgRegion.params.get(SGolayIntensity.KEY_SGOLAYEASY);
 
-        try {
-            algorithmName = orgRegion.params.get("name");
-            valueStr = orgRegion.params.get("sgolay_easy");
-        } catch (Exception e) {
-            needSetToDefault = true;
-        }
-
-        if (needSetToDefault) {
+        if (StringUtils.isEmptyString(algorithmName) || StringUtils.isEmptyString(valueStr)) {
             algorithmName = "com.sciaps.common.algorithms.SimpleIntensityValue";
             valueStr = "[3, 2, 0]";
         }
 
-        UBObject params = UBValueFactory.createObject(orgRegion.params);
-        dbRegion.setParams(params);
+        UBObject params = UBValueFactory.createObject();
         params.put("name", UBValueFactory.createValue(algorithmName));
         params.put(SGolayIntensity.KEY_SGOLAYEASY, UBValueFactory.createValue(valueStr));
+
+        dbRegion.setParams(params);
 
         // int mode type;
         dbRegion.setModeType(orgRegion.regionType);
