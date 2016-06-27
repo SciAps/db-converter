@@ -1,15 +1,13 @@
 package com.sciaps.data;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.sciaps.common.objtracker.DBObj;
 import com.sciaps.common.objtracker.IdRefTypeAdapterFactory;
 import com.sciaps.common.spectrum.LIBZPixelSpectrum;
 import com.sciaps.common.spectrum.Spectrum;
 import com.sciaps.common.utils.MultiShotSpectrumFileInputStream;
+import com.sciaps.common.utils.ShotDataHelper;
 import org.mapdb.BTreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,12 +112,22 @@ public class LIBZDB {
     }
 
     public ArrayList<LIBZPixelSpectrum> getSpectra(OrgLIBZTest test) throws IOException {
-        ArrayList<LIBZPixelSpectrum> retval = new ArrayList<LIBZPixelSpectrum>();
 
         JsonObject obj = getObject(test.mId);
         JsonObject shotTable = obj.getAsJsonObject("shotTable");
+        JsonPrimitive all = shotTable.getAsJsonPrimitive("all");
 
+        if (all != null) {
+            return getSpectra(shotTable);
+        } else {
+            return getSpectraOldFormat(shotTable);
+        }
+    }
+
+    private ArrayList<LIBZPixelSpectrum> getSpectra(JsonObject shotTable) throws IOException {
+        ArrayList<LIBZPixelSpectrum> retval = new ArrayList<LIBZPixelSpectrum>();
         String allId = shotTable.getAsJsonPrimitive("all").getAsString();
+
         ByteArrayInputStream bin = new ByteArrayInputStream(mSpectrumTable.get(allId));
         MultiShotSpectrumFileInputStream multiShotIn = new MultiShotSpectrumFileInputStream(bin);
 
@@ -130,6 +138,25 @@ public class LIBZDB {
             spectrum = multiShotIn.getNextShot();
         }
         multiShotIn.close();
+        return retval;
+    }
+
+    private ArrayList<LIBZPixelSpectrum> getSpectraOldFormat(JsonObject shotTable) throws IOException {
+        ArrayList<LIBZPixelSpectrum> retval = new ArrayList<LIBZPixelSpectrum>();
+
+        for (Map.Entry<String, JsonElement> entry : shotTable.entrySet()) {
+            String key = entry.getKey();
+
+            if (key.compareTo("shot_avg") != 0) {
+                String id = shotTable.getAsJsonPrimitive(key).getAsString();
+                LIBZPixelSpectrum spectrum = ShotDataHelper.loadCompressed(new ByteArrayInputStream(mSpectrumTable.get(id)));
+
+                if (spectrum != null) {
+                    retval.add(spectrum);
+                }
+            }
+        }
+
         return retval;
     }
 
