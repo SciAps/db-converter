@@ -27,6 +27,7 @@ public class LIBZDB {
     private final TreeMap<String, DBObj> mLiveInstances = new TreeMap<String, DBObj>();
     private final DBDataMarshaller mMarshaller;
     private BTreeMap<String, byte[]> mSpectrumTable;
+    private SDBFile mSDBFile;
 
     private class DBDataMarshaller implements DBObj.IdLookup, DBObj.ObjLoader {
 
@@ -72,22 +73,23 @@ public class LIBZDB {
         }
     }
 
-    public LIBZDB() {
+    public LIBZDB(SDBFile file) {
+        mSDBFile = file;
         mMarshaller = new DBDataMarshaller();
 
     }
 
-    public void load(SDBFile file) {
+    public void load() {
         mAllObjects.clear();
 
-        Iterator<SDBFile.DBEntry> it = file.getAll();
+        Iterator<SDBFile.DBEntry> it = mSDBFile.getAll();
         while (it.hasNext()) {
             SDBFile.DBEntry entry = it.next();
             mAllObjects.put(entry.key, entry.value);
 
         }
 
-        mSpectrumTable = file.mSpectrumTable;
+        mSpectrumTable = mSDBFile.mSpectrumTable;
     }
 
     public JsonObject getObject(String id) {
@@ -104,7 +106,7 @@ public class LIBZDB {
         JsonObject shotTable = obj.getAsJsonObject("shotTable");
 
         String allId = shotTable.getAsJsonPrimitive("all").getAsString();
-        ByteArrayInputStream bin = new ByteArrayInputStream(mSpectrumTable.get(allId));
+        ByteArrayInputStream bin = new ByteArrayInputStream(mSDBFile.loadSpectrumByID(allId));
         MultiShotSpectrumFileInputStream multiShotIn = new MultiShotSpectrumFileInputStream(bin);
         Spectrum retval = multiShotIn.getShot(-1);
         multiShotIn.close();
@@ -154,6 +156,52 @@ public class LIBZDB {
                 if (spectrum != null) {
                     retval.add(spectrum);
                 }
+            }
+        }
+
+        return retval;
+    }
+
+    public ArrayList<String> getSpectraShotFileIDs(OrgLIBZTest test) throws IOException {
+
+        JsonObject obj = getObject(test.mId);
+        JsonObject shotTable = obj.getAsJsonObject("shotTable");
+        JsonPrimitive all = shotTable.getAsJsonPrimitive("all");
+
+        if (all != null) {
+            return getSpectraShotFileIDS(shotTable);
+        } else {
+            return getSpectraShotFileIDsOldFormat(shotTable);
+        }
+    }
+
+    private ArrayList<String> getSpectraShotFileIDS(JsonObject shotTable) throws IOException {
+        ArrayList<String> retval = new ArrayList<String>();
+        String allId = shotTable.getAsJsonPrimitive("all").getAsString();
+
+        retval.add(allId);
+
+        /*ByteArrayInputStream bin = new ByteArrayInputStream(mSDBFile.loadSpectrumByID(allId));
+        ZipInputStream zipIn = new ZipInputStream(bin);
+        ZipEntry entry;
+        while ((entry = zipIn.getNextEntry()) != null) {
+            final String fileName = entry.getName();
+            retval.add(fileName);
+        }
+        zipIn.close();*/
+
+        return retval;
+    }
+
+    private ArrayList<String> getSpectraShotFileIDsOldFormat(JsonObject shotTable) throws IOException {
+        ArrayList<String> retval = new ArrayList<String>();
+
+        for (Map.Entry<String, JsonElement> entry : shotTable.entrySet()) {
+            String key = entry.getKey();
+
+            if (key.compareTo("shot_avg") != 0) {
+                String id = shotTable.getAsJsonPrimitive(key).getAsString();
+                retval.add(id);
             }
         }
 

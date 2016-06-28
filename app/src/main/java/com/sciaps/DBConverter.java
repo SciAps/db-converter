@@ -10,10 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.ZipInputStream;
 
 /**
  * Created by jchen on 1/7/16.
@@ -77,17 +74,16 @@ public class DBConverter {
 
         notifyCallback("Loading DB Objects...");
 
-        InputStream theFile = new FileInputStream(dbFile.getAbsoluteFile());
-        ZipInputStream zipInputStream = new ZipInputStream(theFile);
+        SDBFile sdbFile = new SDBFile(dbFile.getAbsolutePath());
+        sdbFile.loadDBObjects();
 
-        SDBFile sdbFile = new SDBFile();
-        sdbFile.load(zipInputStream);
-
-        LIBZDB libzdb = new LIBZDB();
-        libzdb.load(sdbFile);
+        LIBZDB libzdb = new LIBZDB(sdbFile);
+        libzdb.load();
 
         File dbfile = new File(defaultDBFileName);
-        MicroDB db = DBBuilder.builder().build(dbfile);
+        MicroDB db = DBBuilder.builder()
+                .cacheSize(128)
+                .build(dbfile);
         DBObjectConverter dbObjectConverter = new DBObjectConverter();
 
         float dbVersion = libzdb.getDatabaseVersion();
@@ -118,6 +114,10 @@ public class DBConverter {
 
         notifyCallback("Processing Tests...");
         logger.info("Processing Tests");
+
+        // Step 1
+        // This step convert everything in a test except spectrum data
+        dbObjectConverter.setTestShotFileIDMapSize(Iterables.size(tests));
         for (OrgLIBZTest test : tests) {
             logger.info("    TestID: " + test.mId);
             Acquisition acquisition = db.insert(Acquisition.class);
@@ -125,6 +125,10 @@ public class DBConverter {
                 //status = false;
             }
         }
+
+        // Step 2
+        // Convert spectrum data and assign to the test.
+        //sdbFile.loadAndConvertTestSpectra(db, dbObjectConverter);
 
 
         // dbVersion == -1 is older DB(no multicurves)

@@ -25,6 +25,7 @@ public class DBObjectConverter {
     private DBObjectInventory mDBObjectInventory = new DBObjectInventory();
     public int testCnt = 0;
     public int testFailed = 0;
+    private Map<UUID, ArrayList<String>> mTestShotFileIDMap = new HashMap<UUID, ArrayList<String>>();
 
     public static void convertSpectrumToSpectraData(LIBZPixelSpectrum spectrum, SpectraData spectraData) {
         DataHelper.LIBZSpectraDataBuilder builder = DataHelper.LIBZSpectraDataBuilder.builder();
@@ -37,6 +38,14 @@ public class DBObjectConverter {
         }
 
         builder.build(spectraData);
+    }
+
+    public Map<UUID, ArrayList<String>> getTestShotFileIDMap() {
+        return mTestShotFileIDMap;
+    }
+
+    public void setTestShotFileIDMapSize (int size) {
+        mTestShotFileIDMap = new HashMap<UUID, ArrayList<String>>(size);
     }
 
     public boolean convertLIBZTestToAcquisition(OrgLIBZTest test, Acquisition acquisition, LIBZDB libzdb) {
@@ -77,6 +86,17 @@ public class DBObjectConverter {
         acquisition.setOnlyAvgSaved(test.onlyAvgSaved);
 
         // get spectra data
+        // Due to high memory usage, the spectra data is not be loaded at this point,
+        // will load them later on
+        /*try {
+            ArrayList<String> shotFileIDs = libzdb.getSpectraShotFileIDs(test);
+            mTestShotFileIDMap.put(acquisition.getId(), shotFileIDs);
+        } catch (Exception e) {
+            testFailed++;
+            status = false;
+            logger.error("Failed to get spectrum for test: " + test.mId);
+        }*/
+
         try {
             // Avg and each shot
             SpectraData[] spectraDatas = new SpectraData[libzdb.getSpectra(test).size()];

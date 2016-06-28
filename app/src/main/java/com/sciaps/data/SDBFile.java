@@ -2,31 +2,35 @@ package com.sciaps.data;
 
 
 import com.devsmart.IOUtils;
+import com.devsmart.microdb.MicroDB;
 import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+import com.sciaps.Utils.DBObjectConverter;
 import com.sciaps.common.data.LIBZTest;
 import com.sciaps.common.data.Model;
 import com.sciaps.common.data.Region;
 import com.sciaps.common.data.Standard;
 import com.sciaps.common.objtracker.IdRefTypeAdapterFactory;
+import com.sciaps.common.spectrum.LIBZPixelSpectrum;
+import com.sciaps.common.utils.MultiShotSpectrumFileInputStream;
+import com.sciaps.common.utils.ShotDataHelper;
+import org.apache.commons.lang.ArrayUtils;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -108,6 +112,7 @@ public class SDBFile {
     List<LIBZTest> mTests;
     List<Region> mRegions;
 
+
     public Iterator<DBEntry> getAll() {
         return mDB.iterator();
     }
@@ -161,18 +166,28 @@ public class SDBFile {
         return retval;
     }
 
-    public byte[] getSpectrum(String id) {
-        return mSpectrumTable.get(id);
-    }
+    //public byte[] getSpectrum(String id) {
+    //   return mSpectrumTable.get(id);
+    //}
 
 
-    public SDBFile() {
+    private final int MAX_STORE_SPECTRA_SIZE = 1000;
+    private ArrayList<String> mProcessedSpectra = new ArrayList<String>();
+    private String mSdbFilePath;
+
+    public SDBFile(String sdbFilePath) {
+        mSdbFilePath = sdbFilePath;
         mSpectrumTable = mMemDB.createTreeMap("spectrum")
                 .makeStringMap();
 
     }
 
-    public void load(ZipInputStream zipIn) throws IOException {
+    // Loading all dbobject in memory
+    public void loadDBObjects() throws IOException {
+
+        InputStream theFile = new FileInputStream(mSdbFilePath);
+        ZipInputStream zipIn = new ZipInputStream(theFile);
+
         ZipEntry entry = null;
         while((entry = zipIn.getNextEntry()) != null) {
             final String name = entry.getName();
@@ -195,15 +210,13 @@ public class SDBFile {
                 }
 
                 mDB.add(dbEntry);
-
-                continue;
             }
 
 
             m = SPECTRUM_FILE_REGEX.matcher(name);
             if(m.find()) {
                 String id = m.group(1);
-                logger.info("loading spectrum file: {}", id);
+                //logger.info("loading spectrum file: {}", id);
 
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 IOUtils.pump(zipIn, bout, false, true);
@@ -213,8 +226,140 @@ public class SDBFile {
             }
 
             logger.warn("unknown file: {}", name);
+        }
 
+        zipIn.close();
+    }
 
+    // Read the sdb and return the spectrum data
+    public byte[] loadSpectrumByID(final String spectrumFileID) throws IOException {
+        InputStream theFile = new FileInputStream(mSdbFilePath);
+        ZipInputStream zipIn = new ZipInputStream(theFile);
+
+        ZipEntry entry = null;
+        while ((entry = zipIn.getNextEntry()) != null) {
+            final String name = entry.getName();
+
+            Matcher m = SPECTRUM_FILE_REGEX.matcher(name);
+            if (m.find()) {
+                String id = m.group(1);
+
+                if (id.compareTo(spectrumFileID) == 0) {
+                    logger.info("loading spectrum file: {}", id);
+
+                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                    IOUtils.pump(zipIn, bout, false, true);
+
+                    byte[] data = bout.toByteArray();
+                    zipIn.close();
+
+                    mProcessedSpectra.add(spectrumFileID);
+                    return data;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // Read the sdb file, reads all test object and save it to the new microDB
+    public void loadAndConvertTestSpectra(final MicroDB db, final DBObjectConverter dbObjectConverter) throws IOException {
+        InputStream theFile = new FileInputStream(mSdbFilePath);
+        ZipInputStream zipIn = new ZipInputStream(theFile);
+
+        final Map<UUID, ArrayList<String>> testShotFileIDMap = dbObjectConverter.getTestShotFileIDMap();
+
+        byte[] data;
+        ArrayList<LIBZPixelSpectrum> spectra = new ArrayList<LIBZPixelSpectrum>();
+        SpectraData[] newSpectraData;
+        SpectraData[] orgSpectraData;
+        SpectraData[] concatedData;
+        LIBZPixelSpectrum spectrum;
+        ByteArrayInputStream bin;
+        MultiShotSpectrumFileInputStream multiShotIn;
+        ByteArrayOutputStream bout;
+
+        int cnt = 0;
+        ZipEntry entry = null;
+        while ((entry = zipIn.getNextEntry()) != null) {
+            final String name = entry.getName();
+
+            Matcher m = SPECTRUM_FILE_REGEX.matcher(name);
+            if (m.find()) {
+                cnt ++;
+
+                String id = m.group(1);
+
+                    logger.info("loading spectrum file: {}", id);
+
+                    bout = new ByteArrayOutputStream();
+                    IOUtils.pump(zipIn, bout, false, true);
+
+                    data = bout.toByteArray();
+
+                    spectra.clear();
+
+                    // old format
+                    try {
+                        spectrum = ShotDataHelper.loadCompressed(new ByteArrayInputStream(data));
+                        spectra.add(spectrum);
+
+                    } catch (ZipException ze) {
+                        // new format
+
+                        bin = new ByteArrayInputStream(data);
+                        multiShotIn = new MultiShotSpectrumFileInputStream(bin);
+
+                        multiShotIn.seekTo(0);
+                        spectrum = multiShotIn.getNextShot();
+                        while (spectrum != null) {
+                            spectra.add(spectrum);
+                            spectrum = multiShotIn.getNextShot();
+                        }
+                        multiShotIn.close();
+                    }
+
+                if (spectra.size() != 0) {
+
+                    // Lookup the test of this spectrum and add it
+                    for (Map.Entry<UUID, ArrayList<String>> testShotFileIDEntry : testShotFileIDMap.entrySet()) {
+                        for (String fileID : testShotFileIDEntry.getValue()) {
+
+                            //Found the matching file id for the spectrum
+                            if (fileID.compareTo(id) == 0) {
+
+                                // Retrieve the acquisition obj from database and update the spectraData list
+                                Acquisition acquisition = db.get(testShotFileIDEntry.getKey());
+
+                                newSpectraData = new SpectraData[spectra.size()];
+
+                                // Convert LIBZPixelSpectrum to SpectraData
+                                for (int i = 0; i < spectra.size(); i++) {
+                                    SpectraData spectraData = new SpectraData();
+                                    dbObjectConverter.convertSpectrumToSpectraData(spectra.get(i), spectraData);
+                                    newSpectraData[i] = spectraData;
+                                }
+
+                                // setting spectraData
+                                orgSpectraData = acquisition.getSpectraData();
+                                if (orgSpectraData == null) {
+                                    acquisition.setSpectraData(newSpectraData);
+                                } else {
+                                    concatedData = (SpectraData[]) ArrayUtils.addAll(orgSpectraData, newSpectraData);
+                                    acquisition.setSpectraData(concatedData);
+                                }
+
+                                if(cnt > 10) {
+                                    db.flush();
+                                    cnt = 0;
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            }
         }
     }
 
