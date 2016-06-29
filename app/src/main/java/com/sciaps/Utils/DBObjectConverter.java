@@ -23,10 +23,8 @@ public class DBObjectConverter {
     static Logger logger = LoggerFactory.getLogger(DBObjectConverter.class);
 
     private DBObjectInventory mDBObjectInventory = new DBObjectInventory();
-    public int testCnt = 0;
-    public int testFailed = 0;
 
-    public static void convertSpectrumToSpectraData(LIBZPixelSpectrum spectrum, SpectraData spectraData) {
+    public void convertSpectrumToSpectraData(LIBZPixelSpectrum spectrum, SpectraData spectraData) {
         DataHelper.LIBZSpectraDataBuilder builder = DataHelper.LIBZSpectraDataBuilder.builder();
         builder.knots(spectrum.knots, 0, spectrum.knots.length);
 
@@ -41,7 +39,6 @@ public class DBObjectConverter {
 
     public boolean convertLIBZTestToAcquisition(OrgLIBZTest test, Acquisition acquisition, LIBZDB libzdb) {
         boolean status = true;
-        testCnt++;
 
         //Time
         acquisition.setTime(test.unixTime);
@@ -102,7 +99,6 @@ public class DBObjectConverter {
             acquisition.setSpectraData(spectraDatas);
 
         } catch (Exception e) {
-            testFailed++;
             status = false;
             logger.error("Failed to get spectrum for test: " + test.mId);
             logger.error("This exception can be ok. ", e);

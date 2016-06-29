@@ -167,8 +167,11 @@ public final class MainFrame extends javax.swing.JFrame implements DBConverter.D
 
                 try {
                     dbConverter.doDBConvert(dbFile);
+                    String summary = dbConverter.mSummary;
 
+                    resultMsg = String.format("Done. %s", summary);
                     logger.info(resultMsg);
+
                     mResultLabel.setBackground(Color.GREEN);
                 } catch (Exception e) {
                     resultMsg = "DB Convert Failed (see log file for detail).";

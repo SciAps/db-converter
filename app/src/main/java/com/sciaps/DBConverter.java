@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipInputStream;
 
@@ -25,6 +24,7 @@ public class DBConverter {
     }
 
     static Logger logger = LoggerFactory.getLogger(DBConverter.class);
+    public String mSummary;
     private DBConverterStatusInterface mCallback;
 
     public DBConverter(DBConverterStatusInterface callback) {
@@ -47,6 +47,8 @@ public class DBConverter {
     }
 
     public void doDBConvert(File dbFile) throws Exception {
+        mSummary = "";
+
         logger.info(dbFile.getParent());
         logger.info("DB to convert: " + dbFile.getCanonicalPath());
 
@@ -87,7 +89,7 @@ public class DBConverter {
         libzdb.load(sdbFile);
 
         File dbfile = new File(defaultDBFileName);
-        MicroDB db = DBBuilder.builder().build(dbfile);
+        MicroDB db = DBBuilder.builder().cacheSize(128).build(dbfile);
         DBObjectConverter dbObjectConverter = new DBObjectConverter();
 
         float dbVersion = libzdb.getDatabaseVersion();
@@ -106,10 +108,13 @@ public class DBConverter {
 
         notifyCallback("Processing Standards...");
         logger.info("Processing Standards");
+        int totalStandards = Iterables.size(standards);
+        int cnt = 0;
         for (OrgStandard orgStandard : standards) {
             logger.info("   StanardName: " + orgStandard.name);
             Standard dbStandard = db.insert(Standard.class);
             dbObjectConverter.convertStandardToDBStandard(orgStandard, dbStandard);
+            notifyCallback("Processing Standards..." + ++cnt + "/" + totalStandards);
         }
 
         notifyCallback("Reading Tests...");
@@ -118,17 +123,23 @@ public class DBConverter {
 
         notifyCallback("Processing Tests...");
         logger.info("Processing Tests");
+        int totalTests = Iterables.size(tests);
+        int totalTestFailed = 0;
+        cnt = 0;
         for (OrgLIBZTest test : tests) {
             logger.info("    TestID: " + test.mId);
             Acquisition acquisition = db.insert(Acquisition.class);
+
             if (dbObjectConverter.convertLIBZTestToAcquisition(test, acquisition, libzdb) == false) {
-                //status = false;
+                totalTestFailed++;
             }
+            notifyCallback("Processing Tests..." + ++cnt + "/" + totalTests);
         }
 
 
         // dbVersion == -1 is older DB(no multicurves)
         int totalModels = 0;
+        cnt = 0;
         if (dbVersion < 0) {
             notifyCallback("Reading Models...");
             logger.info("Reading Models");
@@ -141,6 +152,8 @@ public class DBConverter {
                 logger.info("    Models: " + orgModel.name);
                 EmpiricalModel empiricalModel = db.insert(EmpiricalModel.class);
                 dbObjectConverter.convertModelToEmpiricalModel(orgModel, empiricalModel);
+
+                notifyCallback("Processing Models..." + ++cnt + "/" + totalModels);
             }
         } else {
             notifyCallback("Reading Models...");
@@ -154,6 +167,8 @@ public class DBConverter {
                 logger.info("    Models: " + orgModel2.name);
                 EmpiricalModel empiricalModel = db.insert(EmpiricalModel.class);
                 dbObjectConverter.convertModel2ToEmpiricalModel(orgModel2, empiricalModel);
+
+                notifyCallback("Processing Models..." + ++cnt + "/" + totalModels);
             }
         }
 
@@ -173,11 +188,8 @@ public class DBConverter {
         //    dbObjectConverter.convertFingerprintToDBFingerprint(orgFingerprintLibraryTemplate, dbFingerprintLibTemplate);
         //}
 
+        notifyCallback("Writing to database...");
         db.flush();
-
-        //doTestModel(db);
-        //doTestAcquisition(db);
-        //doStandardTest(db);
 
         db.close();
         db.shutdown();
@@ -193,51 +205,7 @@ public class DBConverter {
             logger.info("DB Size: " + bytes + " bytes");
         }
 
-        System.out.println("TestCnt: " + dbObjectConverter.testCnt);
-        System.out.println("Test Failed: " + dbObjectConverter.testFailed);
-
-        System.out.println("Total Model:     " + totalModels);
-        System.out.println("Total Standards: " + Iterables.size(standards));
-        System.out.println("Total Tests:     " + Iterables.size(tests));
-
-    }
-
-    private void doTestModel(MicroDB db) {
-        try {
-            System.out.println("Retrieving Model");
-            Iterable<EmpiricalModel> models = db.getAllOfType(EmpiricalModel.class);
-            for (EmpiricalModel model : models) {
-
-                System.out.println("************" + model.getName() + "\t Standard: " + model.getStandards().length + "\t curves: " + model.getIrCurves().length);
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    private void doTestAcquisition(MicroDB db) {
-        try {
-            System.out.println("Retrieving test");
-            Iterable<Acquisition> tests = db.getAllOfType(Acquisition.class);
-            for (Acquisition test : tests) {
-
-                if (test.getSpectraData() != null) {
-                    System.out.println("************" + test.getSpectraData().length);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    private void doStandardTest(MicroDB db) {
-        try {
-            System.out.println("Retrieving test");
-            Iterable<Standard> standards = db.getAllOfType(Standard.class);
-
-            System.out.println("# Standards = " + Iterables.size(standards));
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        mSummary = String.format("Models: %d  Standards: %d   Tests: %d/%d",
+                totalModels, totalStandards, totalTests - totalTestFailed, totalTests);
     }
 }

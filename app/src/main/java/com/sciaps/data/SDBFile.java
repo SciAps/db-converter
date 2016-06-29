@@ -34,7 +34,8 @@ public class SDBFile {
 
     private static final Logger logger = LoggerFactory.getLogger(SDBFile.class);
 
-    public static final Type MapType = new TypeToken<Map<String, Object>>(){}.getType();
+    public static final Type MapType = new TypeToken<Map<String, Object>>() {
+    }.getType();
 
     private static final Pattern DBOBJ_REGEX = Pattern.compile("dbobj/([^/]*)/(.*).json");
     private static final Pattern SPECTRUM_FILE_REGEX = Pattern.compile("spectrum/(.*).gz");
@@ -97,6 +98,7 @@ public class SDBFile {
     }
 
     private DB mMemDB = DBMaker.newTempFileDB()
+            .cacheSize(128)
             .transactionDisable()
             .deleteFilesAfterClose()
             .make();
@@ -125,9 +127,9 @@ public class SDBFile {
 
         @Override
         public boolean hasNext() {
-            while(mIt.hasNext()) {
+            while (mIt.hasNext()) {
                 DBEntry entry = mIt.next();
-                if(entry.type != null && entry.type.equals(mType)){
+                if (entry.type != null && entry.type.equals(mType)) {
                     mNextEntry = entry;
                     return true;
                 }
@@ -139,7 +141,7 @@ public class SDBFile {
         @Override
         public DBEntry next() {
             DBEntry retval = mNextEntry;
-            if(retval == null) {
+            if (retval == null) {
                 throw new RuntimeException();
             }
             mNextEntry = null;
@@ -174,11 +176,11 @@ public class SDBFile {
 
     public void load(ZipInputStream zipIn) throws IOException {
         ZipEntry entry = null;
-        while((entry = zipIn.getNextEntry()) != null) {
+        while ((entry = zipIn.getNextEntry()) != null) {
             final String name = entry.getName();
 
             Matcher m = DBOBJ_REGEX.matcher(name);
-            if(m.find()) {
+            if (m.find()) {
                 String type = m.group(1);
                 String id = m.group(2);
 
@@ -190,7 +192,7 @@ public class SDBFile {
                 dbEntry.type = type;
                 dbEntry.value = ZipGson.fromJson(in, JsonElement.class);
 
-                if(mDB.contains(dbEntry)) {
+                if (mDB.contains(dbEntry)) {
                     throw new RuntimeException("db already contains obj with id: " + dbEntry.key);
                 }
 
@@ -201,7 +203,7 @@ public class SDBFile {
 
 
             m = SPECTRUM_FILE_REGEX.matcher(name);
-            if(m.find()) {
+            if (m.find()) {
                 String id = m.group(1);
                 logger.info("loading spectrum file: {}", id);
 
