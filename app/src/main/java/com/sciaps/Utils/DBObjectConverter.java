@@ -235,10 +235,10 @@ public class DBObjectConverter {
         // String name
         dbStandard.setName(orgStandard.name);
 
-        ArrayTable table = ArrayTable.createWithColumnTypes(int.class, double.class);
+        ArrayTable table = ArrayTable.createWithColumnTypes(int.class, double.class, double.class);
 
         for (ChemValue chemValue : orgStandard.spec) {
-            table.addRow(chemValue.element.atomicNumber, chemValue.percent);
+            table.addRow(chemValue.element.atomicNumber, chemValue.percent, chemValue.error);
         }
         dbStandard.setAssayTable(table);
 
