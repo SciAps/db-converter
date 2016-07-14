@@ -314,8 +314,8 @@ public class DBObjectConverter {
         dbRegion.setDisabled(false);
 
         // WaveLengthRange wavelengthRange;
-        dbRegion.setWlMin(orgRegion.wavelengthRange.getMinimumDouble());
-        dbRegion.setWlMax(orgRegion.wavelengthRange.getMaximumDouble());
+        dbRegion.setMin(orgRegion.wavelengthRange.getMinimumDouble());
+        dbRegion.setMax(orgRegion.wavelengthRange.getMaximumDouble());
 
         // Params
         String algorithmName = orgRegion.params.get("name");
@@ -333,7 +333,7 @@ public class DBObjectConverter {
         dbRegion.setParams(params);
 
         // int mode type;
-        dbRegion.setModeType(orgRegion.regionType);
+        //dbRegion.setModeType(orgRegion.regionType);
 
         return status;
     }
@@ -376,8 +376,8 @@ public class DBObjectConverter {
 
         // WaveLengthRange irRange
         if (irCurve.irRange != null) {
-            dbirCurve.setWlMin(irCurve.irRange.getMinimumDouble());
-            dbirCurve.setWlMax(irCurve.irRange.getMaximumDouble());
+            dbirCurve.setMin(irCurve.irRange.getMinimumDouble());
+            dbirCurve.setMax(irCurve.irRange.getMaximumDouble());
         }
 
         // double calRangeFactor
