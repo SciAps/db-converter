@@ -71,7 +71,7 @@ public class DBObjectConverter {
         //acquisition.setDisplayName(test.displayName);
 
         // Only Avg Save flag
-        acquisition.setOnlyAvgSaved(test.onlyAvgSaved);
+        //acquisition.setOnlyAvgSaved(test.onlyAvgSaved);
 
         // get spectra data
         try {
@@ -273,7 +273,7 @@ public class DBObjectConverter {
         boolean status = true;
 
         // String name
-        dbIRRatio.setName(irRatio.name);
+        //dbIRRatio.setName(irRatio.name);
 
         // Atomic #
         dbIRRatio.setAtomicNum(irRatio.element.atomicNumber);
@@ -388,7 +388,7 @@ public class DBObjectConverter {
         dbirCurve.setIrRatio(irRatio);
 
         // String name
-        irRatio.setName(irCurve.name);
+        //irRatio.setName(irCurve.name);
 
         // AtomicElementDatum atomicElementDatum
         irRatio.setAtomicNum(irCurve.element.atomicNumber);
