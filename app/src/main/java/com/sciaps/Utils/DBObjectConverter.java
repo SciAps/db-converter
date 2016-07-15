@@ -301,6 +301,7 @@ public class DBObjectConverter {
             index++;
         }
         dbIRRatio.setDenominator(denominatorRegions);
+        dbIRRatio.setMetadata(UBValueFactory.createObject());
 
         return status;
     }
@@ -417,6 +418,9 @@ public class DBObjectConverter {
             index++;
         }
         irRatio.setDenominator(denominatorRegions);
+        irRatio.setMetadata(UBValueFactory.createObject());
+
+        dbirCurve.setMetadata(UBValueFactory.createObject());
 
         return status;
     }
