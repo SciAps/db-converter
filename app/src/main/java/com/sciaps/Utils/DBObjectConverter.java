@@ -41,7 +41,7 @@ public class DBObjectConverter {
         boolean status = true;
 
         //Time
-        acquisition.setTime(test.unixTime);
+        acquisition.setTime(test.unixTime * 1000);
 
         //standard
         if (test.standard != null) {
