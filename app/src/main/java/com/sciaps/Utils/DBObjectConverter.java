@@ -147,7 +147,7 @@ public class DBObjectConverter {
         int index = 0;
         for (Map.Entry<AtomicElement, OrgIRCurve> irCurve : orgModel.irs.entrySet()) {
 
-            IRCurve dbirCurve = empiricalModel.getDB().insert(IRCurve.class);
+            IRCurve dbirCurve = new IRCurve();
             dbirCurve.setPriority(0); // not multiple curves, not need to set priority
             convertIRCurveToDBIRCurve(irCurve.getValue(), dbirCurve);
 
@@ -212,7 +212,7 @@ public class DBObjectConverter {
             priority = 0; // reset the curve priority within each element
             for (OrgIRCurve orgIRCurve : orgIRCurves) {
 
-                IRCurve dbirCurve = empiricalModel.getDB().insert(IRCurve.class);
+                IRCurve dbirCurve = new IRCurve();
                 convertIRCurveToDBIRCurve(orgIRCurve, dbirCurve);
                 dbirCurve.setPriority(priority);
 
@@ -285,7 +285,7 @@ public class DBObjectConverter {
         Region[] numeratorRegions = new Region[irRatio.numerator.size()];
         int index = 0;
         for (OrgRegion orgRegion : irRatio.numerator) {
-            Region dbRegion = dbIRRatio.getDB().insert(Region.class);
+            Region dbRegion = new Region();
             convertRegionToDBRegion(orgRegion, dbRegion);
 
             numeratorRegions[index] = dbRegion;
@@ -297,7 +297,7 @@ public class DBObjectConverter {
         Region[] denominatorRegions = new Region[irRatio.denominator.size()];
         index = 0;
         for (OrgRegion orgRegion : irRatio.denominator) {
-            Region dbRegion = dbIRRatio.getDB().insert(Region.class);
+            Region dbRegion = new Region();
             convertRegionToDBRegion(orgRegion, dbRegion);
 
             denominatorRegions[index] = dbRegion;
@@ -387,7 +387,7 @@ public class DBObjectConverter {
         // double calRangeFactor
         dbirCurve.setCalRangeFactor(irCurve.calRangeFactor);
 
-        IRRatio irRatio = dbirCurve.getDB().insert(IRRatio.class);
+        IRRatio irRatio = new IRRatio();
 
         dbirCurve.setIrRatio(irRatio);
 
@@ -402,7 +402,7 @@ public class DBObjectConverter {
         index = 0;
         for (OrgRegion orgRegion : irCurve.numerator) {
 
-            Region dbRegion = dbirCurve.getDB().insert(Region.class);
+            Region dbRegion = new Region();
             convertRegionToDBRegion(orgRegion, dbRegion);
 
             numeratorRegions[index] = dbRegion;
@@ -414,7 +414,7 @@ public class DBObjectConverter {
         Region[] denominatorRegions = new Region[irCurve.denominator.size()];
         index = 0;
         for (OrgRegion orgRegion : irCurve.denominator) {
-            Region dbRegion = dbirCurve.getDB().insert(Region.class);
+            Region dbRegion = new Region();
             convertRegionToDBRegion(orgRegion, dbRegion);
 
             denominatorRegions[index] = dbRegion;
@@ -465,7 +465,7 @@ public class DBObjectConverter {
         index = 0;
         IRRatio[] featureRegions = new IRRatio[orgFingerprintLibraryTemplate.featureRegions.size()];
         for (OrgIRRatio2 orgIrRatio2 : orgFingerprintLibraryTemplate.featureRegions) {
-            IRRatio dbirRatio = dbFingerprintLibTemplate.getDB().insert(IRRatio.class);
+            IRRatio dbirRatio = new IRRatio();
             convertIRRatio2ToDBIRRatio(orgIrRatio2, dbirRatio);
 
             featureRegions[index] = dbirRatio;
