@@ -1,6 +1,7 @@
 package com.sciaps.Utils;
 
 import com.devsmart.StringUtils;
+import com.devsmart.ubjson.UBArray;
 import com.devsmart.ubjson.UBObject;
 import com.devsmart.ubjson.UBValue;
 import com.devsmart.ubjson.UBValueFactory;
@@ -124,7 +125,10 @@ public class DBObjectConverter {
         //AcquisitionParams
         LIBZAcquisitionParams acquisitionParams = new LIBZAcquisitionParams();
         UBObject libzAcquisitionParams = acquisitionParams.getParamUBObject();
-        empiricalModel.setAcquisitionParams(libzAcquisitionParams);
+        UBValue[] ubValues = new UBValue[1];
+        ubValues[0] = libzAcquisitionParams;
+        UBArray paramsArray = UBValueFactory.createArray(ubValues);
+        empiricalModel.setAcquisitionParams(paramsArray);
 
         //Standard[]
         Standard[] standards = new Standard[orgModel.standardList.size()];
@@ -178,7 +182,13 @@ public class DBObjectConverter {
             LIBZAcquisitionParams acquisitionParams = new LIBZAcquisitionParams();
             acquisitionParams.setAcquisitionParams(orgModel.rasterParams);
             UBObject ubObjAcquisitionParams = acquisitionParams.getParamUBObject();
-            empiricalModel.setAcquisitionParams(ubObjAcquisitionParams);
+
+            UBValue[] ubValues = new UBValue[1];
+            ubValues[0] = ubObjAcquisitionParams;
+
+            UBArray ubArray = UBValueFactory.createArray(ubValues);
+
+            empiricalModel.setAcquisitionParams(ubArray);
         }
 
         //ModelType;
