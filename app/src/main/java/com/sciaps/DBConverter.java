@@ -2,6 +2,8 @@ package com.sciaps;
 
 import com.devsmart.microdb.DBBuilder;
 import com.devsmart.microdb.MicroDB;
+import com.devsmart.ubjson.UBObject;
+import com.devsmart.ubjson.UBValueFactory;
 import com.google.common.collect.Iterables;
 import com.sciaps.Utils.DBObjectConverter;
 import com.sciaps.data.*;
@@ -52,7 +54,7 @@ public class DBConverter {
         logger.info(dbFile.getParent());
         logger.info("DB to convert: " + dbFile.getCanonicalPath());
 
-        String defaultDBFileName = MainFrame.mFilePath + File.separator + "MicroDB";
+        String defaultDBFileName = MainFrame.mFilePath + File.separator + "maindb";
         try {
             File dbfile = new File(defaultDBFileName);
             if (dbfile.exists()) {
@@ -94,6 +96,14 @@ public class DBConverter {
 
         float dbVersion = libzdb.getDatabaseVersion();
         logger.info("Converting DB Version: " + dbVersion);
+
+        // First thing first, insert an instrument object to state what type of database. In this case, it is LIBZ
+        Instrument instrument = db.insert(Instrument.class);
+        instrument.setSerialNum("UNKNOWN");
+        instrument.setModel("LIBZ");
+        instrument.setAnalyzerType(Instrument.INSTRUMENT_TYPE_LIBZ);
+        UBObject acquisitionParams = UBValueFactory.createObject();
+        instrument.setAcquisitionParams(acquisitionParams);
 
         // Order of db object reading
         // 1. Standards
