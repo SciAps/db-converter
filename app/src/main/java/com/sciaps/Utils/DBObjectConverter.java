@@ -92,9 +92,6 @@ public class DBObjectConverter {
             for (LIBZPixelSpectrum spectrum : spectra) {
                 SpectraData spectraData = acquisition.getDB().insert(SpectraData.class);
                 convertSpectrumToSpectraData(spectrum, spectraData);
-                //UBObject spectraMetadata = UBValueFactory.createObject();
-                //spectraMetadata.put(DataHelper.KEY_TYPE, UBValueFactory.createString("LIBZ"));
-                //spectraData.setMetadata(spectraMetadata);
                 spectraDatas[i] = spectraData;
                 spectrum.release();
                 i++;
